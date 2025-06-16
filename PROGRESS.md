@@ -46,24 +46,25 @@
 - [x] カレンダー状態管理（useCalendar フック）✅ **完了**
 - [x] 画面統合・動作確認 ✅ **完了**
 
-### Phase 3: イベント機能 ⏳ **予定**
+### Phase 3: イベント機能 ✅ **完了**
 
-- [ ] EventList（イベント一覧）
-- [ ] EventForm（イベント作成・編集フォーム）
-- [ ] EventItem（イベント項目）
-- [ ] イベント状態管理
-- [ ] 画面統合・動作確認
+- [x] EventList（イベント一覧）✅ **完了**
+- [x] EventForm（イベント作成・編集フォーム）✅ **完了**
+- [x] EventItem（イベント項目）✅ **完了**
+- [x] イベント状態管理（useEvents フック）✅ **完了**
+- [x] 画面統合・動作確認 ✅ **完了**
 
-### Phase 4: UI/UX 向上 ⏳ **予定**
+### Phase 4: UI/UX 向上 🎯 **準備完了**
 
 - [ ] レスポンシブ対応
 - [ ] ダークモード
-- [ ] アニメーション
+- [ ] アニメーション・トランジション
+- [ ] アクセシビリティ向上
 - [ ] 画面統合・動作確認
 
 ## 🧪 現在のテスト状況
 
-### 実装済み（✅ 全 191 テスト成功）
+### 実装済み（✅ 全 253 テスト成功）
 
 #### `__tests__/lib/dateUtils.test.ts`
 
@@ -161,6 +162,50 @@
 - 表示モード: month/week の切り替え
 - ヘルパー関数: 月内日付取得、選択日付の今日判定
 
+#### `__tests__/components/features/calendar/EventList.test.tsx`
+
+- 基本機能: イベント一覧表示、空状態での「イベントがありません」表示
+- イベント情報表示: タイトル、時間（開始-終了）、説明文表示
+- イベントクリック: onEventClick ハンドラー実行
+- 編集・削除機能: onEventEdit、onEventDelete ハンドラー対応、ボタン表示制御
+- スタイリング: イベント色の境界線適用、アイコンボタンの適切な配置
+- 条件付き表示: 時間なしイベント対応、説明なしイベント対応
+- アクセシビリティ: 編集・削除ボタンの aria-label 設定
+
+#### `__tests__/components/features/calendar/EventForm.test.tsx`
+
+- 基本機能: フォームフィールド表示（タイトル・説明・時間・色）、保存・キャンセルボタン表示、日付表示
+- イベント作成: 空フォーム初期化、必須フィールドバリデーション、タイトル入力時保存ボタン有効化、フォーム送信時 onSave 実行
+- イベント編集: 既存イベント値での初期化、編集モードでの保存ボタン有効化
+- バリデーション: 終了時間 < 開始時間エラー表示、バリデーションエラー時保存ボタン無効化
+- キャンセル機能: キャンセルボタンクリック時 onCancel 実行
+- アクセシビリティ: フォーム aria-label、必須フィールド aria-required、エラーメッセージ aria-describedby 関連付け
+
+#### `__tests__/components/features/calendar/EventItem.test.tsx`
+
+- 基本機能: イベントタイトル・時間・説明表示、イベントクリック処理、イベント色境界線適用
+- 条件付き表示: 時間なし・説明なし・開始時間のみの各パターン対応
+- 編集・削除機能: 編集・削除ボタン表示制御、各ハンドラー実行、ボタン非表示制御
+- スタイリング: 基本スタイルクラス適用、ホバー時の遷移エフェクト
+- アクセシビリティ: メインボタンの適切な aria-label、編集・削除ボタンの aria-label 設定
+
+#### `__tests__/hooks/useEvents.test.ts`
+
+- 初期化: 空配列初期状態、ローカルストレージからのデータ読み込み
+- イベント追加: 新規イベント追加、自動 ID・タイムスタンプ生成、ローカルストレージ保存
+- イベント更新: 既存イベント更新、存在しない ID 処理、更新時間自動設定、ローカルストレージ保存
+- イベント削除: 指定 ID 削除、存在しない ID 処理、ローカルストレージ保存
+- 日付絞り込み: 指定日付のイベント取得、存在しない日付の空配列返却、同日複数イベント対応
+- 全削除: 全イベント削除、ローカルストレージからの削除
+
+#### `__tests__/integration/MainPage.test.tsx` ✅ **新規追加**
+
+- カレンダー・イベント統合: カレンダー表示とイベント機能の完全統合テスト
+- 日付選択・イベント表示: 選択日付のイベント一覧表示、空状態対応
+- イベント追加機能: フォーム表示、データ入力、保存処理、表示更新の統合テスト
+- イベント編集・削除: 既存イベントの編集・削除機能の統合動作確認
+- 月移動・データ連携: 月移動時のイベントデータ保持・表示更新の確認
+
 ## 📁 現在のファイル構造
 
 ```
@@ -179,9 +224,13 @@ app/
 │       └── calendar/
 │           ├── CalendarGrid.tsx ✅ 実装済み
 │           ├── CalendarHeader.tsx ✅ 実装済み
-│           └── CalendarDay.tsx ✅ 実装済み
+│           ├── CalendarDay.tsx ✅ 実装済み
+│           ├── EventList.tsx ✅ 実装済み
+│           ├── EventForm.tsx ✅ 実装済み
+│           └── EventItem.tsx ✅ 実装済み
 ├── hooks/
-│   └── useCalendar.ts    ✅ 実装済み
+│   ├── useCalendar.ts    ✅ 実装済み
+│   └── useEvents.ts      ✅ 実装済み
 └── types/
     └── calendar.ts       ✅ 実装済み
 
@@ -190,19 +239,25 @@ __tests__/
 │   ├── dateUtils.test.ts  ✅ 実装済み
 │   ├── utils.test.ts      ✅ 実装済み
 │   └── storage.test.ts    ✅ 実装済み
-    ├── components/
-    │   ├── ui/
-    │   │   ├── Button.test.tsx ✅ 実装済み
-    │   │   ├── Input.test.tsx  ✅ 実装済み
-    │   │   ├── Modal.test.tsx  ✅ 実装済み
-    │   │   └── IconButton.test.tsx ✅ 実装済み
-    │   └── features/
-    │       └── calendar/
-    │           ├── CalendarGrid.test.tsx ✅ 実装済み
-    │           ├── CalendarHeader.test.tsx ✅ 実装済み
-    │           └── CalendarDay.test.tsx ✅ 実装済み
-    └── hooks/
-        └── useCalendar.test.ts ✅ 実装済み
+├── components/
+│   ├── ui/
+│   │   ├── Button.test.tsx ✅ 実装済み
+│   │   ├── Input.test.tsx  ✅ 実装済み
+│   │   ├── Modal.test.tsx  ✅ 実装済み
+│   │   └── IconButton.test.tsx ✅ 実装済み
+│   └── features/
+│       └── calendar/
+│           ├── CalendarGrid.test.tsx ✅ 実装済み
+│           ├── CalendarHeader.test.tsx ✅ 実装済み
+│           ├── CalendarDay.test.tsx ✅ 実装済み
+│           ├── EventList.test.tsx ✅ 実装済み
+│           ├── EventForm.test.tsx ✅ 実装済み
+│           └── EventItem.test.tsx ✅ 実装済み
+├── hooks/
+│   ├── useCalendar.test.ts ✅ 実装済み
+│   └── useEvents.test.ts ✅ 実装済み
+└── integration/
+    └── MainPage.test.tsx ✅ 実装済み
 ```
 
 ## 🎨 設計済み型定義（未実装）
@@ -246,27 +301,39 @@ export interface CalendarEvent {
 
 ## 🚀 次にやること
 
-### ✅ Phase 2 カレンダー表示 - 完了！
+### ✅ Phase 1: 基盤構築 - 完了！
+
+TDD 環境構築、ユーティリティ関数、UI コンポーネント（Button、Input、Modal、IconButton）の実装が完了しました！
+
+### ✅ Phase 2: カレンダー表示 - 完了！
 
 CalendarGrid、CalendarHeader、CalendarDay コンポーネント、および useCalendar フックの実装が完了しました！
 
-### 最優先: Phase 3 イベント機能 - 開始準備
+### ✅ Phase 3: イベント機能 - 完了！ 🎉
 
-Phase 2 が完了したので、次は Phase 3 のイベント機能に移ります。
+Phase 3 のすべてのコンポーネント・フック・統合テストの TDD サイクル（Red → Green → Refactor）が完了しました！
 
-1. **EventList コンポーネント**（イベント一覧表示）
-2. **EventForm コンポーネント**（イベント作成・編集フォーム）
-3. **EventItem コンポーネント**（個別イベント項目）
-4. **イベント状態管理**（useEvents フック）
+**完了した機能:**
 
-### TDD 開発手順（次回作業時）
+- **EventList**: イベント一覧表示、EventItem コンポーネントを使用するようにリファクタリング済み
+- **EventForm**: イベント作成・編集フォーム（タイトル・説明・時間・色）、バリデーション機能
+- **EventItem**: 個別イベント項目表示、編集・削除ボタン、条件付き表示対応
+- **useEvents**: イベント状態管理フック、CRUD 操作、ローカルストレージ連携、日付絞り込み
+- **画面統合**: メインページでのカレンダー・イベント機能完全統合
+- **統合テスト**: MainPage 統合テスト（5 項目）の実装・成功
+- **動作確認**: ブラウザでの実際の動作確認完了
+- すべてのコンポーネントでアクセシビリティ対応（aria-label、aria-required、aria-describedby）
+- TypeScript 型安全性、包括的テストカバレッジ（253 テスト成功）
 
-Phase 3 の最初のコンポーネントから TDD で開発を開始：
+### 🎯 次のフェーズ: Phase 4 - UI/UX 向上
 
-1. **Red**: EventList コンポーネントの失敗するテストを書く
-2. **Green**: テストが通る最小限のコードを書く
-3. **Refactor**: コードを改善する
-4. **UI 統合**: 各コンポーネント完成後に画面に反映して動作確認
+準備完了！次の開発対象：
+
+1. **レスポンシブ対応**: モバイル・タブレット対応の改善
+2. **ダークモード**: ライトモード・ダークモードの切り替え機能
+3. **アニメーション・トランジション**: スムーズな画面遷移とフィードバック
+4. **アクセシビリティ向上**: さらなる WCAG 準拠とユーザビリティ改善
+5. **動作確認**: 各機能のブラウザでの動作確認
 
 ### テスト実行コマンド
 
@@ -307,14 +374,23 @@ pnpm test Button.test.tsx
 - **CalendarHeader**: 年月表示、月移動ナビゲーション、今日ボタン
 - **CalendarDay**: 日付セル、選択状態・今日・週末の視覚表現、イベント数表示
 
+**イベントコンポーネント:**
+
+- **EventList**: イベント一覧表示、EventItem コンポーネント活用、空状態対応
+- **EventForm**: イベント作成・編集フォーム、バリデーション、アクセシビリティ対応
+- **EventItem**: 個別イベント項目表示、編集・削除ボタン、条件付き表示、イベント色適用
+
 **カスタムフック:**
 
 - **useCalendar**: カレンダー状態管理、日付選択、月移動、表示モード切り替え
+- **useEvents**: イベント状態管理、CRUD 操作、ローカルストレージ連携、日付絞り込み機能
 
 **画面統合:**
 
 - **Phase 2 完了**: useCalendar フック統合による状態管理の一元化
-- **実動確認**: localhost:3000 でカレンダーが完全に動作可能
+- **Phase 3 完了**: useEvents フック統合によるイベント機能完全統合
+- **統合テスト**: MainPage 統合テスト（253 テスト中 5 テスト）実装・成功
+- **実動確認**: localhost:3000 でカレンダー・イベント機能が完全に動作可能
 
 ### 技術的決定事項
 

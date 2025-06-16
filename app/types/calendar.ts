@@ -18,6 +18,7 @@ export interface CalendarGridProps {
   selectedDate: Date | null;
   onDateSelect: (date: Date) => void;
   events?: CalendarEvent[];
+  onAddEvent?: (date: Date) => void;
 }
 
 export interface CalendarEvent {

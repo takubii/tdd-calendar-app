@@ -14,7 +14,9 @@ import { CalendarDay } from './CalendarDay';
 export function CalendarGrid({
   currentDate,
   selectedDate,
-  onDateSelect
+  onDateSelect,
+  events = [],
+  onAddEvent
 }: CalendarGridProps) {
   // カレンダーグリッドに表示する全ての日付を生成
   const generateCalendarDates = (): CalendarDate[] => {
@@ -52,6 +54,10 @@ export function CalendarGrid({
     return isSameDay(date, selectedDate);
   };
 
+  const getEventsForDate = (date: Date) => {
+    return events.filter(event => isSameDay(event.date, date));
+  };
+
   return (
     <table role="table" aria-label="カレンダー" className="w-full border-collapse">
       {/* 曜日ヘッダー */}
@@ -87,7 +93,9 @@ export function CalendarGrid({
                     isToday={calendarDate.isToday}
                     isSelected={selected}
                     isWeekend={calendarDate.isWeekend}
+                    events={getEventsForDate(date)}
                     onSelect={onDateSelect}
+                    onAddEvent={onAddEvent}
                   />
                 </td>
               );
