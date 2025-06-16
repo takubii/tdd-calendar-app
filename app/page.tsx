@@ -1,14 +1,33 @@
 'use client';
 
-import { useState } from 'react';
 import { CalendarGrid } from '@/app/components/features/calendar/CalendarGrid';
+import { CalendarHeader } from '@/app/components/features/calendar/CalendarHeader';
+import { useCalendar } from '@/app/hooks/useCalendar';
 
 export default function Home() {
-  const [currentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const {
+    currentDate,
+    selectedDate,
+    selectDate,
+    goToPreviousMonth,
+    goToNextMonth,
+    goToToday,
+  } = useCalendar();
 
   const handleDateSelect = (date: Date) => {
-    setSelectedDate(date);
+    selectDate(date);
+  };
+
+  const handlePrevMonth = () => {
+    goToPreviousMonth();
+  };
+
+  const handleNextMonth = () => {
+    goToNextMonth();
+  };
+
+  const handleToday = () => {
+    goToToday();
   };
 
   return (
@@ -23,31 +42,45 @@ export default function Home() {
           </p>
         </header>
 
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">
-              {currentDate.getFullYear()}年{currentDate.getMonth() + 1}月
-            </h2>
-            {selectedDate && (
-              <p className="text-gray-600">
-                選択中: {selectedDate.getFullYear()}年
-                {selectedDate.getMonth() + 1}月{selectedDate.getDate()}日
-              </p>
-            )}
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          {/* カレンダーヘッダー */}
+          <CalendarHeader
+            currentDate={currentDate}
+            onPrevMonth={handlePrevMonth}
+            onNextMonth={handleNextMonth}
+            onToday={handleToday}
+          />
+
+          {/* 選択状態の表示 */}
+          <div className="px-6 py-4 bg-gray-50 border-b">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-800">
+                {currentDate.getFullYear()}年{currentDate.getMonth() + 1}月
+              </h2>
+              {selectedDate && (
+                <p className="text-gray-600">
+                  選択中: {selectedDate.getFullYear()}年
+                  {selectedDate.getMonth() + 1}月{selectedDate.getDate()}日
+                </p>
+              )}
+            </div>
           </div>
 
-          <CalendarGrid
-            currentDate={currentDate}
-            selectedDate={selectedDate}
-            onDateSelect={handleDateSelect}
-          />
+          {/* カレンダーグリッド */}
+          <div className="p-6">
+            <CalendarGrid
+              currentDate={currentDate}
+              selectedDate={selectedDate}
+              onDateSelect={handleDateSelect}
+            />
+          </div>
         </div>
 
         <div className="mt-8 text-center">
           <div className="inline-flex gap-4 text-sm text-gray-500">
-            <span>✅ 130 テスト成功</span>
+            <span>✅ 191 テスト成功</span>
             <span>🎯 TDD開発プロセス</span>
-            <span>📦 Phase 2: カレンダー表示</span>
+            <span>🎉 Phase 2 完了: カレンダー表示</span>
           </div>
         </div>
       </div>

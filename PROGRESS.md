@@ -38,12 +38,13 @@
 - [x] Modal コンポーネント ✅ **完了**
 - [x] IconButton コンポーネント ✅ **完了**
 
-### Phase 2: カレンダー表示 ⏳ **進行中**
+### Phase 2: カレンダー表示 ✅ **完了**
 
 - [x] CalendarGrid（メインカレンダー表示）✅ **完了**
-- [ ] CalendarHeader（月移動ヘッダー）
-- [ ] CalendarDay（日付セル）
-- [ ] カレンダー状態管理
+- [x] CalendarHeader（月移動ヘッダー）✅ **完了**
+- [x] CalendarDay（日付セル）✅ **完了**
+- [x] カレンダー状態管理（useCalendar フック）✅ **完了**
+- [x] 画面統合・動作確認 ✅ **完了**
 
 ### Phase 3: イベント機能 ⏳ **予定**
 
@@ -51,16 +52,18 @@
 - [ ] EventForm（イベント作成・編集フォーム）
 - [ ] EventItem（イベント項目）
 - [ ] イベント状態管理
+- [ ] 画面統合・動作確認
 
 ### Phase 4: UI/UX 向上 ⏳ **予定**
 
 - [ ] レスポンシブ対応
 - [ ] ダークモード
 - [ ] アニメーション
+- [ ] 画面統合・動作確認
 
 ## 🧪 現在のテスト状況
 
-### 実装済み（✅ 全 130 テスト成功）
+### 実装済み（✅ 全 191 テスト成功）
 
 #### `__tests__/lib/dateUtils.test.ts`
 
@@ -131,6 +134,33 @@
 - アクセシビリティ: table role、aria-label、ボタンのキーボードナビゲーション
 - スタイリング: 週末色分け（日曜日=赤、土曜日=青）、他月日付の薄表示
 
+#### `__tests__/components/features/calendar/CalendarHeader.test.tsx`
+
+- 基本機能: 年月表示、前月・次月・今日ボタンの表示・動作
+- 月移動機能: onPrevMonth、onNextMonth、onToday コールバック実行
+- 年月表示: 日本語形式（2024 年 1 月〜12 月）、年またぎ対応
+- アクセシビリティ: aria-label 設定、HTML ボタンタグ認識
+- スタイリング: ヘッダーコンテナレイアウト、年月テキストスタイル
+- キーボードナビゲーション: フォーカス可能性、標準キーボードサポート
+
+#### `__tests__/components/features/calendar/CalendarDay.test.tsx`
+
+- 基本機能: 日付表示、クリック選択、ボタンアクセシビリティ
+- 状態表示: 今日・選択・週末・他月の視覚的表現
+- 優先順位: 選択状態 > 今日 > 週末の適切なスタイル適用
+- イベント表示: イベント数バッジ表示、イベント存在/非存在での表示切替
+- イベント追加: ダブルクリックでのイベント追加機能
+- アクセシビリティ: aria-label（今日・選択中・イベント数情報含む）
+
+#### `__tests__/hooks/useCalendar.test.ts`
+
+- 初期化: 初期日付・選択状態・表示モード設定
+- 日付選択: 選択・選択解除・同一日付再選択での選択解除
+- 月移動: 前月・次月・今日・特定日付への移動
+- 年跨ぎ: 1 月 ←→12 月の年跨ぎ移動対応
+- 表示モード: month/week の切り替え
+- ヘルパー関数: 月内日付取得、選択日付の今日判定
+
 ## 📁 現在のファイル構造
 
 ```
@@ -147,7 +177,11 @@ app/
 │   │   └── IconButton.tsx ✅ 実装済み
 │   └── features/
 │       └── calendar/
-│           └── CalendarGrid.tsx ✅ 実装済み
+│           ├── CalendarGrid.tsx ✅ 実装済み
+│           ├── CalendarHeader.tsx ✅ 実装済み
+│           └── CalendarDay.tsx ✅ 実装済み
+├── hooks/
+│   └── useCalendar.ts    ✅ 実装済み
 └── types/
     └── calendar.ts       ✅ 実装済み
 
@@ -156,15 +190,19 @@ __tests__/
 │   ├── dateUtils.test.ts  ✅ 実装済み
 │   ├── utils.test.ts      ✅ 実装済み
 │   └── storage.test.ts    ✅ 実装済み
-└── components/
-    ├── ui/
-    │   ├── Button.test.tsx ✅ 実装済み
-    │   ├── Input.test.tsx  ✅ 実装済み
-    │   ├── Modal.test.tsx  ✅ 実装済み
-    │   └── IconButton.test.tsx ✅ 実装済み
-    └── features/
-        └── calendar/
-            └── CalendarGrid.test.tsx ✅ 実装済み
+    ├── components/
+    │   ├── ui/
+    │   │   ├── Button.test.tsx ✅ 実装済み
+    │   │   ├── Input.test.tsx  ✅ 実装済み
+    │   │   ├── Modal.test.tsx  ✅ 実装済み
+    │   │   └── IconButton.test.tsx ✅ 実装済み
+    │   └── features/
+    │       └── calendar/
+    │           ├── CalendarGrid.test.tsx ✅ 実装済み
+    │           ├── CalendarHeader.test.tsx ✅ 実装済み
+    │           └── CalendarDay.test.tsx ✅ 実装済み
+    └── hooks/
+        └── useCalendar.test.ts ✅ 実装済み
 ```
 
 ## 🎨 設計済み型定義（未実装）
@@ -208,35 +246,27 @@ export interface CalendarEvent {
 
 ## 🚀 次にやること
 
-### 最優先: Phase 2 カレンダー表示 - 継続
+### ✅ Phase 2 カレンダー表示 - 完了！
 
-CalendarGrid コンポーネントが完了しました！次はカレンダーヘッダーの実装に移ります。
+CalendarGrid、CalendarHeader、CalendarDay コンポーネント、および useCalendar フックの実装が完了しました！
 
-1. **CalendarHeader コンポーネント**（月移動ヘッダー）
+### 最優先: Phase 3 イベント機能 - 開始準備
 
-   ```typescript
-   interface CalendarHeaderProps {
-     currentDate: Date;
-     onPrevMonth: () => void;
-     onNextMonth: () => void;
-     onToday: () => void;
-   }
-   ```
+Phase 2 が完了したので、次は Phase 3 のイベント機能に移ります。
+
+1. **EventList コンポーネント**（イベント一覧表示）
+2. **EventForm コンポーネント**（イベント作成・編集フォーム）
+3. **EventItem コンポーネント**（個別イベント項目）
+4. **イベント状態管理**（useEvents フック）
 
 ### TDD 開発手順（次回作業時）
 
-1. **Red**: 失敗するテストを書く
+Phase 3 の最初のコンポーネントから TDD で開発を開始：
 
-   - `__tests__/components/features/calendar/CalendarHeader.test.tsx` を作成
-   - カレンダーヘッダーの基本機能テストケース作成
-
+1. **Red**: EventList コンポーネントの失敗するテストを書く
 2. **Green**: テストが通る最小限のコードを書く
-
-   - `app/components/features/calendar/CalendarHeader.tsx` を実装
-
 3. **Refactor**: コードを改善する
-   - レスポンシブ対応
-   - アクセシビリティ対応
+4. **UI 統合**: 各コンポーネント完成後に画面に反映して動作確認
 
 ### テスト実行コマンド
 
@@ -269,6 +299,22 @@ pnpm test Button.test.tsx
 - **Button**: バリアント対応（primary/secondary/danger）、サイズ対応、loading 状態
 - **Input**: 型対応（text/email/password/date/time）、エラー表示、アクセシビリティ
 - **Modal**: ダイアログ表示、Escape/オーバーレイクリック対応、フォーカス管理、アリア属性
+- **IconButton**: アイコンボタン、バリアント・サイズ対応、loading 状態
+
+**カレンダーコンポーネント:**
+
+- **CalendarGrid**: 月間カレンダー表示、日付選択、曜日ヘッダー、アクセシビリティ対応
+- **CalendarHeader**: 年月表示、月移動ナビゲーション、今日ボタン
+- **CalendarDay**: 日付セル、選択状態・今日・週末の視覚表現、イベント数表示
+
+**カスタムフック:**
+
+- **useCalendar**: カレンダー状態管理、日付選択、月移動、表示モード切り替え
+
+**画面統合:**
+
+- **Phase 2 完了**: useCalendar フック統合による状態管理の一元化
+- **実動確認**: localhost:3000 でカレンダーが完全に動作可能
 
 ### 技術的決定事項
 
