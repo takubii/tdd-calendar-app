@@ -1,11 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import {
   formatDate,
-  isToday,
-  isSameDay,
+  isWeekend,
+  addDays,
   getMonthDays,
-  getCalendarWeeks,
-  getDayOfWeek
+  isSameDay,
+  isToday,
+  getWeekStart,
+  getMonthStart,
+  getMonthEnd
 } from '@/app/lib/dateUtils';
 
 describe('dateUtils', () => {
@@ -16,10 +19,65 @@ describe('dateUtils', () => {
       expect(result).toBe('2024/12/25');
     });
 
-    it('一桁の月と日にはゼロパディングを行う', () => {
+    it('1桁の月日を2桁でフォーマットする', () => {
       const date = new Date('2024-01-05');
       const result = formatDate(date);
       expect(result).toBe('2024/01/05');
+    });
+  });
+
+  describe('isWeekend', () => {
+    it('土曜日の場合trueを返す', () => {
+      const saturday = new Date('2024-12-28'); // 土曜日
+      expect(isWeekend(saturday)).toBe(true);
+    });
+
+    it('日曜日の場合trueを返す', () => {
+      const sunday = new Date('2024-12-29'); // 日曜日
+      expect(isWeekend(sunday)).toBe(true);
+    });
+
+    it('平日の場合falseを返す', () => {
+      const monday = new Date('2024-12-30'); // 月曜日
+      expect(isWeekend(monday)).toBe(false);
+    });
+  });
+
+  describe('addDays', () => {
+    it('指定した日数を追加する', () => {
+      const baseDate = new Date('2024-12-25');
+      const result = addDays(baseDate, 7);
+      expect(result.getDate()).toBe(1); // 2025年1月1日
+      expect(result.getMonth()).toBe(0); // 1月（0ベース）
+      expect(result.getFullYear()).toBe(2025);
+    });
+
+    it('元の日付を変更しない', () => {
+      const baseDate = new Date('2024-12-25');
+      const originalDate = baseDate.getDate();
+      addDays(baseDate, 7);
+      expect(baseDate.getDate()).toBe(originalDate);
+    });
+
+    it('負の値で日付を戻すことができる', () => {
+      const baseDate = new Date('2024-12-25');
+      const result = addDays(baseDate, -10);
+      expect(result.getDate()).toBe(15);
+      expect(result.getMonth()).toBe(11); // 12月（0ベース）
+    });
+  });
+
+  describe('isSameDay', () => {
+    it('同じ日付の場合trueを返す', () => {
+      const date1 = new Date('2024-12-25T10:00:00');
+      const date2 = new Date('2024-12-25T15:30:00');
+      expect(isSameDay(date1, date2)).toBe(true);
+    });
+
+    it('異なる日付の場合falseを返す', () => {
+      const date1 = new Date('2024-12-25');
+      const date2 = new Date('2024-12-26');
+      expect(isSameDay(date1, date2)).toBe(false);
     });
   });
 
@@ -30,114 +88,71 @@ describe('dateUtils', () => {
     });
 
     it('今日以外の日付の場合falseを返す', () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterday = addDays(new Date(), -1);
       expect(isToday(yesterday)).toBe(false);
     });
   });
 
-  describe('isSameDay', () => {
-    it('同じ日付の場合trueを返す', () => {
-      const date1 = new Date('2024-12-25');
-      const date2 = new Date('2024-12-25');
-      expect(isSameDay(date1, date2)).toBe(true);
+  describe('getWeekStart', () => {
+    it('日曜日から始まる週の開始日を取得する', () => {
+      const wednesday = new Date('2024-12-25'); // 水曜日
+      const weekStart = getWeekStart(wednesday);
+      expect(weekStart.getDay()).toBe(0); // 日曜日
+      expect(weekStart.getDate()).toBe(22); // 12月22日（日曜日）
     });
 
-    it('異なる日付の場合falseを返す', () => {
-      const date1 = new Date('2024-12-25');
-      const date2 = new Date('2024-12-26');
-      expect(isSameDay(date1, date2)).toBe(false);
-    });
-
-    it('時刻が異なっても同じ日付の場合trueを返す', () => {
-      const date1 = new Date('2024-12-25T10:00:00');
-      const date2 = new Date('2024-12-25T15:30:00');
-      expect(isSameDay(date1, date2)).toBe(true);
+    it('日曜日の場合は同じ日付を返す', () => {
+      const sunday = new Date('2024-12-22'); // 日曜日
+      const weekStart = getWeekStart(sunday);
+      expect(isSameDay(sunday, weekStart)).toBe(true);
     });
   });
 
-  describe('getDayOfWeek', () => {
-    it('日曜日の場合0を返す', () => {
-      const sunday = new Date('2024-12-29'); // 日曜日
-      expect(getDayOfWeek(sunday)).toBe(0);
+  describe('getMonthStart', () => {
+    it('月の最初の日を取得する', () => {
+      const date = new Date('2024-12-25');
+      const monthStart = getMonthStart(date);
+      expect(monthStart.getDate()).toBe(1);
+      expect(monthStart.getMonth()).toBe(11); // 12月（0ベース）
+      expect(monthStart.getFullYear()).toBe(2024);
+    });
+  });
+
+  describe('getMonthEnd', () => {
+    it('月の最後の日を取得する', () => {
+      const date = new Date('2024-12-25');
+      const monthEnd = getMonthEnd(date);
+      expect(monthEnd.getDate()).toBe(31); // 12月31日
+      expect(monthEnd.getMonth()).toBe(11); // 12月（0ベース）
     });
 
-    it('月曜日の場合1を返す', () => {
-      const monday = new Date('2024-12-30'); // 月曜日
-      expect(getDayOfWeek(monday)).toBe(1);
-    });
+    it('2月の場合は28日または29日を返す', () => {
+      const feb2024 = new Date('2024-02-15'); // うるう年
+      const monthEnd2024 = getMonthEnd(feb2024);
+      expect(monthEnd2024.getDate()).toBe(29);
 
-    it('土曜日の場合6を返す', () => {
-      const saturday = new Date('2024-12-28'); // 土曜日
-      expect(getDayOfWeek(saturday)).toBe(6);
+      const feb2023 = new Date('2023-02-15'); // 平年
+      const monthEnd2023 = getMonthEnd(feb2023);
+      expect(monthEnd2023.getDate()).toBe(28);
     });
   });
 
   describe('getMonthDays', () => {
-    it('2024年12月の日数は31日を返す', () => {
-      const days = getMonthDays(2024, 11); // 11 = 12月（0ベース）
-      expect(days).toBe(31);
+    it('月のすべての日付を配列で返す', () => {
+      const date = new Date('2024-02-15');
+      const days = getMonthDays(date);
+      expect(days).toHaveLength(29); // 2024年2月はうるう年
+      expect(days[0].getDate()).toBe(1);
+      expect(days[28].getDate()).toBe(29);
     });
 
-    it('2024年2月の日数は29日を返す（うるう年）', () => {
-      const days = getMonthDays(2024, 1); // 1 = 2月（0ベース）
-      expect(days).toBe(29);
-    });
-
-    it('2023年2月の日数は28日を返す（平年）', () => {
-      const days = getMonthDays(2023, 1); // 1 = 2月（0ベース）
-      expect(days).toBe(28);
-    });
-  });
-
-  describe('getCalendarWeeks', () => {
-    it('2024年12月のカレンダー週を正しく生成する', () => {
-      const weeks = getCalendarWeeks(2024, 11); // 11 = 12月（0ベース）
-
-      // 6週間のデータが返されること
-      expect(weeks).toHaveLength(6);
-
-      // 各週は7日間であること
-      weeks.forEach(week => {
-        expect(week.days).toHaveLength(7);
+    it('各日付が正しい月であることを確認する', () => {
+      const date = new Date('2024-12-15');
+      const days = getMonthDays(date);
+      days.forEach(day => {
+        expect(day.getMonth()).toBe(11); // 12月（0ベース）
+        expect(day.getFullYear()).toBe(2024);
       });
-
-      // 最初の日は日曜日であること
-      expect(weeks[0].days[0].dayOfWeek).toBe(0);
-
-      // 12月1日が正しい位置にあること
-      const firstDay = weeks[0].days.find(day =>
-        day.date.getDate() === 1 &&
-        day.date.getMonth() === 11 &&
-        day.isCurrentMonth
-      );
-      expect(firstDay).toBeDefined();
-      expect(firstDay?.dayOfWeek).toBe(0); // 2024年12月1日は日曜日
-    });
-
-    it('前月・翌月の日付を含む完全なカレンダーを生成する', () => {
-      const weeks = getCalendarWeeks(2024, 11); // 11 = 12月（0ベース）
-
-      // 前月の日付が含まれていること（12月1日が日曜日でない場合）
-      const hasNonCurrentMonth = weeks.some(week =>
-        week.days.some(day => !day.isCurrentMonth)
-      );
-
-      // 42日（6週間 × 7日）すべてが埋まっていること
-      const totalDays = weeks.reduce((total, week) => total + week.days.length, 0);
-      expect(totalDays).toBe(42);
-    });
-
-    it('今日の日付を正しく特定する', () => {
-      const today = new Date();
-      const weeks = getCalendarWeeks(today.getFullYear(), today.getMonth());
-
-      const todayCell = weeks
-        .flatMap(week => week.days)
-        .find(day => day.isToday);
-
-      expect(todayCell).toBeDefined();
-      expect(todayCell?.date.getDate()).toBe(today.getDate());
     });
   });
 });
