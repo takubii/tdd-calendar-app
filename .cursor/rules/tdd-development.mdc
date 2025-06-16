@@ -1,0 +1,322 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# TDD開発ルール
+
+## 概要
+このプロジェクトではテスト駆動開発（TDD）を必須とし、すべての新機能・バグ修正において「Red → Green → Refactor」のサイクルを遵守します。
+
+## 技術スタック
+- **フレームワーク**: Next.js 15 (App Router)
+- **言語**: TypeScript
+- **ライブラリ**: React 19
+- **テストフレームワーク**: Vitest
+- **テストライブラリ**: @testing-library/react, @testing-library/dom
+- **スタイリング**: TailwindCSS 4
+- **パッケージマネージャー**: pnpm
+
+## TDD開発プロセス
+
+### 1. Red - 失敗するテストを書く
+まず、実装したい機能のテストを書きます。この時点でテストは失敗するはずです。
+
+### 2. Green - テストが通る最小限のコードを書く
+テストを通すために最小限のコードを実装します。きれいなコードである必要はありません。
+
+### 3. Refactor - コードをリファクタリングする
+テストが通ることを確認しながら、コードを改善します。
+
+## ファイル配置規則
+
+### ディレクトリ構造
+```
+app/
+├── components/          # 再利用可能なコンポーネント
+│   ├── ui/             # UIプリミティブコンポーネント
+│   └── features/       # 機能固有のコンポーネント
+├── lib/                # ユーティリティ関数・ヘルパー
+├── hooks/              # カスタムフック
+├── types/              # TypeScript型定義
+└── (pages)/            # ページコンポーネント
+
+__tests__/              # テストファイル（ルートレベル）
+├── components/         # コンポーネントテスト
+├── lib/               # ユーティリティテスト
+├── hooks/             # カスタムフックテスト
+└── integration/       # 統合テスト
+```
+
+### ファイル命名規則
+- コンポーネント: `PascalCase.tsx`
+- ユーティリティ: `camelCase.ts`
+- テストファイル: 対象ファイル名 + `.test.ts` または `.test.tsx`
+- カスタムフック: `use` + `PascalCase.ts`
+
+## テストサンプル
+
+### 1. ユーティリティ関数のテスト例
+
+**lib/dateUtils.ts**
+```typescript
+export function formatDate(date: Date): string {
+  return date.toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+}
+
+export function isWeekend(date: Date): boolean {
+  const dayOfWeek = date.getDay();
+  return dayOfWeek === 0 || dayOfWeek === 6; // 0: 日曜日, 6: 土曜日
+}
+
+export function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+```
+
+**__tests__/lib/dateUtils.test.ts**
+```typescript
+import { describe, it, expect } from 'vitest';
+import { formatDate, isWeekend, addDays } from '@/lib/dateUtils';
+
+describe('dateUtils', () => {
+  describe('formatDate', () => {
+    it('日付を日本語形式でフォーマットする', () => {
+      const date = new Date('2024-12-25');
+      const result = formatDate(date);
+      expect(result).toBe('2024/12/25');
+    });
+  });
+
+  describe('isWeekend', () => {
+    it('土曜日の場合trueを返す', () => {
+      const saturday = new Date('2024-12-28'); // 土曜日
+      expect(isWeekend(saturday)).toBe(true);
+    });
+
+    it('日曜日の場合trueを返す', () => {
+      const sunday = new Date('2024-12-29'); // 日曜日
+      expect(isWeekend(sunday)).toBe(true);
+    });
+
+    it('平日の場合falseを返す', () => {
+      const monday = new Date('2024-12-30'); // 月曜日
+      expect(isWeekend(monday)).toBe(false);
+    });
+  });
+
+  describe('addDays', () => {
+    it('指定した日数を追加する', () => {
+      const baseDate = new Date('2024-12-25');
+      const result = addDays(baseDate, 7);
+      expect(result.getDate()).toBe(1); // 2025年1月1日
+      expect(result.getMonth()).toBe(0); // 1月（0ベース）
+    });
+
+    it('元の日付を変更しない', () => {
+      const baseDate = new Date('2024-12-25');
+      const originalDate = baseDate.getDate();
+      addDays(baseDate, 7);
+      expect(baseDate.getDate()).toBe(originalDate);
+    });
+  });
+});
+```
+
+### 2. Reactコンポーネントのテスト例
+
+**app/components/ui/Button.tsx**
+```typescript
+import { ButtonHTMLAttributes, ReactNode } from 'react';
+import { cn } from '@/lib/utils';
+
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
+  variant?: 'primary' | 'secondary' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
+}
+
+export function Button({
+  children,
+  variant = 'primary',
+  size = 'md',
+  loading = false,
+  className,
+  disabled,
+  ...props
+}: ButtonProps) {
+  const baseClasses = 'rounded-md font-medium transition-colors focus:outline-none focus:ring-2';
+
+  const variantClasses = {
+    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500',
+    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
+  };
+
+  const sizeClasses = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2',
+    lg: 'px-6 py-3 text-lg'
+  };
+
+  return (
+    <button
+      className={cn(
+        baseClasses,
+        variantClasses[variant],
+        sizeClasses[size],
+        (disabled || loading) && 'opacity-50 cursor-not-allowed',
+        className
+      )}
+      disabled={disabled || loading}
+      {...props}
+    >
+      {loading ? (
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          読み込み中...
+        </div>
+      ) : (
+        children
+      )}
+    </button>
+  );
+}
+```
+
+**__tests__/components/ui/Button.test.tsx**
+```typescript
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Button } from '@/app/components/ui/Button';
+
+describe('Button', () => {
+  it('子要素を正しく表示する', () => {
+    render(<Button>クリック</Button>);
+    expect(screen.getByRole('button', { name: 'クリック' })).toBeInTheDocument();
+  });
+
+  it('クリック時にonClickハンドラーが呼ばれる', () => {
+    const handleClick = vi.fn();
+    render(<Button onClick={handleClick}>クリック</Button>);
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('disabled状態の時クリックできない', () => {
+    const handleClick = vi.fn();
+    render(
+      <Button onClick={handleClick} disabled>
+        クリック
+      </Button>
+    );
+
+    const button = screen.getByRole('button');
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+    expect(handleClick).not.toHaveBeenCalled();
+  });
+
+  it('loading状態の時「読み込み中...」を表示する', () => {
+    render(<Button loading>送信</Button>);
+
+    expect(screen.getByText('読み込み中...')).toBeInTheDocument();
+    expect(screen.queryByText('送信')).not.toBeInTheDocument();
+  });
+
+  describe('variant props', () => {
+    it('primaryバリアントのスタイルが適用される', () => {
+      render(<Button variant="primary">Primary</Button>);
+      const button = screen.getByRole('button');
+      expect(button).toHaveClass('bg-blue-600', 'text-white');
+    });
+
+    it('secondaryバリアントのスタイルが適用される', () => {
+      render(<Button variant="secondary">Secondary</Button>);
+      const button = screen.getByRole('button');
+      expect(button).toHaveClass('bg-gray-200', 'text-gray-900');
+    });
+
+    it('dangerバリアントのスタイルが適用される', () => {
+      render(<Button variant="danger">Danger</Button>);
+      const button = screen.getByRole('button');
+      expect(button).toHaveClass('bg-red-600', 'text-white');
+    });
+  });
+
+  describe('size props', () => {
+    it('smallサイズのスタイルが適用される', () => {
+      render(<Button size="sm">Small</Button>);
+      const button = screen.getByRole('button');
+      expect(button).toHaveClass('px-3', 'py-1.5', 'text-sm');
+    });
+
+    it('largeサイズのスタイルが適用される', () => {
+      render(<Button size="lg">Large</Button>);
+      const button = screen.getByRole('button');
+      expect(button).toHaveClass('px-6', 'py-3', 'text-lg');
+    });
+  });
+});
+```
+
+## ベストプラクティス
+
+### 1. テスト命名規則
+- テストの説明は日本語で分かりやすく記載する
+- 「何をテストするか」を明確に示す
+- `it('〜の場合、〜を返す/表示する/実行する', () => {})`の形式を使用
+
+### 2. テストの構造
+- **Arrange**: テストデータの準備
+- **Act**: テスト対象の実行
+- **Assert**: 結果の検証
+
+### 3. モック・スタブの使用
+- 外部依存（API、ローカルストレージなど）は必ずモック化する
+- `vi.fn()`を使用してモック関数を作成する
+- テスト後は`vi.clearAllMocks()`でクリーンアップする
+
+### 4. TypeScript活用
+- すべてのファイルでTypeScriptを使用する
+- `any`型の使用は避ける
+- プロパティやイベントハンドラーの型を適切に定義する
+
+### 5. テストの独立性
+- 各テストは他のテストに依存しない
+- テスト実行順序に関係なく成功する
+- 必要に応じて`beforeEach`/`afterEach`でセットアップ・クリーンアップを行う
+
+### 6. カバレッジ目標
+- 新機能: 90%以上のテストカバレッジを維持
+- 既存機能の修正: 修正箇所のテストを必ず追加・更新
+
+## テスト実行コマンド
+
+```bash
+# すべてのテストを実行
+pnpm test
+
+# 監視モードでテストを実行
+pnpm test --watch
+
+# カバレッジ付きでテストを実行
+pnpm test --coverage
+
+# 特定のファイルのテストを実行
+pnpm test Button.test.tsx
+```
+
+## コミットルール
+- テストが通らない状態でのコミットは禁止
+- コミット前に必ず`pnpm test`を実行する
+- 新機能追加時は必ずテストを含める
