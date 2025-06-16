@@ -304,7 +304,7 @@ describe('Button', () => {
 
 ```bash
 # すべてのテストを実行
-pnpm test
+pnpm test -- --run
 
 # 監視モードでテストを実行
 pnpm test --watch
@@ -313,10 +313,10 @@ pnpm test --watch
 pnpm test --coverage
 
 # 特定のファイルのテストを実行
-pnpm test Button.test.tsx
+pnpm test Button.test.tsx -- --run
 ```
 
 ## コミットルール
 - テストが通らない状態でのコミットは禁止
-- コミット前に必ず`pnpm test`を実行する
+- コミット前に必ず`pnpm test -- --run`を実行する
 - 新機能追加時は必ずテストを含める
